@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treinamento - Prática de Idiomas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4" data-page="treinamento">
+
+    <button id="menu-button" class="p-2 rounded-md hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg></button>
+    <nav id="side-menu">
+        <a href="treinamento.html" class="active">Treinamento</a>
+        <a href="conversa-livre.html">Conversa Livre</a>
+        <a href="novas-palavras.html">Novas Palavras</a>
+        <a href="praticar-erros.html">Praticar Erros</a>
+        <a href="progresso.html">Meu Progresso</a>
+    </nav>
+
+    <div class="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-2xl border border-gray-700">
+        
+        <div id="assessment-view">
+            <header class="text-center mb-6">
+                <h1 class="text-2xl sm:text-3xl font-bold text-cyan-400">Modo Treinamento</h1>
+                <p class="text-gray-300 mt-2">Vamos descobrir seu nível de inglês para personalizar sua experiência. Responda a algumas perguntas.</p>
+            </header>
+            <main class="text-center">
+                <button id="start-assessment-button" class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-6 rounded-lg transition-colors text-lg">Iniciar Avaliação</button>
+            </main>
+        </div>
+
+        <div id="practice-view" class="hidden">
+            <header class="text-center mb-4">
+                <h1 class="text-2xl sm:text-3xl font-bold text-cyan-400">Treinamento</h1>
+                <div class="flex justify-center items-center gap-4 mt-2">
+                    <span id="training-level" class="text-lg font-semibold text-gray-300"></span>
+                    <div class="w-1/2 bg-gray-700 rounded-full h-2.5">
+                        <div id="xp-bar" class="bg-cyan-500 h-2.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+            </header>
+            <main id="practice-area">
+                <div id="error-message" class="hidden mb-4 bg-red-500/20 border border-red-500/30 text-red-300 text-sm p-3 rounded-lg"></div>
+                <div class="bg-gray-700/50 p-4 rounded-lg mb-6 flex items-center justify-between min-h-[80px]">
+                    <p id="sentence-to-practice" class="text-lg text-gray-200 flex-grow"></p>
+                    <div class="flex items-center ml-4">
+                        <button id="toggle-visibility-button" class="p-2 rounded-full hover:bg-gray-600 transition-colors mr-2"></button>
+                        <button id="listen-button" class="p-2 rounded-full hover:bg-gray-600 transition-colors"></button>
+                    </div>
+                </div>
+                <div class="flex flex-col items-center justify-center my-8">
+                    <button id="record-button" class="bg-cyan-600 hover:bg-cyan-700 w-20 h-20 rounded-full flex items-center justify-center shadow-lg disabled:bg-gray-500 disabled:cursor-not-allowed">
+                        <svg id="mic-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+                    </button>
+                    <p id="status" class="text-gray-400 mt-4 h-5 text-center"></p>
+                </div>
+                <div id="feedback-section" class="hidden"></div>
+            </main>
+        </div>
+    </div>
+
+    <script src="assets/main.js"></script>
+</body>
+</html>
