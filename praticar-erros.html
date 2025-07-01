@@ -10,11 +10,13 @@
 </head>
 <body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4" data-page="erros">
 
-    <button id="menu-button" class="p-2 rounded-md hover:bg-gray-700">
+    <button id="menu-button" class="p-2 rounded-md hover:bg-gray-700 fixed top-6 left-6 z-50">
         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
     </button>
     <nav id="side-menu">
+        <a href="treinamento.html">Treinamento</a>
         <a href="conversa-livre.html">Conversa Livre</a>
+        <a href="novas-palavras.html">Novas Palavras</a>
         <a href="praticar-erros.html" class="active">Praticar Erros</a>
         <a href="progresso.html">Meu Progresso</a>
     </nav>
@@ -25,8 +27,23 @@
         </header>
 
         <main id="practice-area">
-             <!-- O conteúdo principal (área de prática e feedback) é idêntico ao de conversa-livre.html -->
-             <!-- Você pode copiar a tag <main> inteira de lá e colar aqui, removendo a <form> do tópico -->
+            <div id="error-message" class="hidden mb-4 bg-red-500/20 border border-red-500/30 text-red-300 text-sm p-3 rounded-lg"></div>
+            <div class="bg-gray-700/50 p-4 rounded-lg mb-6 flex items-center justify-between min-h-[80px]">
+                <p id="sentence-to-practice" class="text-lg text-gray-200 flex-grow"></p>
+                <div class="flex items-center ml-4">
+                    <button id="toggle-visibility-button" class="p-2 rounded-full hover:bg-gray-600 transition-colors mr-2"></button>
+                    <button id="listen-button" class="p-2 rounded-full hover:bg-gray-600 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-400"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="flex flex-col items-center justify-center my-8">
+                <button id="record-button" class="bg-cyan-600 hover:bg-cyan-700 w-20 h-20 rounded-full flex items-center justify-center shadow-lg disabled:bg-gray-500 disabled:cursor-not-allowed">
+                     <svg id="mic-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+                </button>
+                <p id="status" class="text-gray-400 mt-4 h-5 text-center"></p>
+            </div>
+            <div id="feedback-section" class="hidden"></div>
         </main>
     </div>
 
