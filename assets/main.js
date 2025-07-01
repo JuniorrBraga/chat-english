@@ -1,8 +1,8 @@
 // --- Seletores de Elementos do DOM (definidos no load) ---
 let sentenceToPracticeEl, listenButton, recordButton, statusEl, feedbackSection,
-    errorMessageEl, nextButton, toggleVisibilityButton, menuButton, sideMenu, 
-    topicForm, topicInput, progressSummaryEl, assessmentView, practiceView, 
-    startAssessmentButton, trainingLevelEl, xpBar;
+    errorMessageEl, toggleVisibilityButton, menuButton, sideMenu, topicForm, 
+    topicInput, progressSummaryEl, assessmentView, practiceView, 
+    startAssessmentButton, trainingLevelEl, xpBar, menuOverlay, closeMenuButton, greetingEl;
 
 // --- Ícones SVG ---
 const eyeIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
@@ -10,7 +10,8 @@ const eyeOffIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="2
 
 // --- Variáveis de Estado ---
 let isRecording = false, recognition, currentSentence = '', micPermissionGranted = false, 
-    isSentenceVisible = true, currentPage = '', userProfile = {}, conversationHistory = [];
+    isSentenceVisible = true, currentPage = '', userProfile = {}, conversationHistory = [],
+    finalTranscript = '';
 
 // --- Chaves e Configurações ---
 const API_KEY = 'AIzaSyCmlG5pRiRD0WY3sszNDMBOJ7L-Lyr3eqs';
@@ -46,7 +47,7 @@ function updateProgress(newScore) {
     saveData(PROGRESS_KEY, progress);
 
     if (userProfile.level) {
-        userProfile.xp += Math.round(newScore / 15); // Ganha XP baseado na pontuação
+        userProfile.xp += Math.round(newScore / 15);
         if (userProfile.xp >= XP_PER_LEVEL) {
             const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
             const currentLevelIndex = levels.indexOf(userProfile.level);
@@ -55,7 +56,7 @@ function updateProgress(newScore) {
                 userProfile.xp = 0;
                 alert(`Parabéns! Você subiu para o nível ${userProfile.level}!`);
             } else {
-                userProfile.xp = XP_PER_LEVEL; // Cap XP at max level
+                userProfile.xp = XP_PER_LEVEL;
             }
         }
         saveData(PROFILE_KEY, userProfile);
@@ -84,6 +85,9 @@ function assignDOMElements() {
     startAssessmentButton = document.getElementById('start-assessment-button');
     trainingLevelEl = document.getElementById('training-level');
     xpBar = document.getElementById('xp-bar');
+    menuOverlay = document.getElementById('menu-overlay');
+    closeMenuButton = document.getElementById('close-menu-button');
+    greetingEl = document.getElementById('greeting');
     currentPage = document.body.dataset.page;
 }
 
@@ -93,10 +97,33 @@ function setupRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognition = new SpeechRecognition();
     recognition.lang = 'en-US';
-    recognition.interimResults = false;
-    recognition.addEventListener('start', () => { isRecording = true; recordButton.classList.add('pulse', 'bg-red-700'); recordButton.classList.remove('bg-cyan-600'); statusEl.textContent = 'Ouvindo...'; });
-    recognition.addEventListener('result', handleRecognitionResult);
-    recognition.addEventListener('end', () => { isRecording = false; recordButton.classList.remove('pulse', 'bg-red-700'); recordButton.classList.add('bg-cyan-600'); statusEl.textContent = 'Clique para gravar novamente'; });
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.addEventListener('start', () => { isRecording = true; finalTranscript = ''; recordButton.classList.add('pulse', 'bg-red-700'); recordButton.classList.remove('bg-cyan-600'); statusEl.textContent = 'Ouvindo... (clique para parar)'; });
+    
+    recognition.addEventListener('result', (event) => {
+        let interimTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+                finalTranscript += event.results[i][0].transcript;
+            } else {
+                interimTranscript += event.results[i][0].transcript;
+            }
+        }
+        // Opcional: mostrar transcrição provisória
+        // statusEl.textContent = interimTranscript;
+    });
+
+    recognition.addEventListener('end', () => {
+        isRecording = false;
+        recordButton.classList.remove('pulse', 'bg-red-700');
+        recordButton.classList.add('bg-cyan-600');
+        statusEl.textContent = 'Clique para gravar novamente';
+        if (finalTranscript) {
+            handleRecognitionResult(finalTranscript);
+        }
+    });
     recognition.addEventListener('error', (event) => { let e = `Erro: ${event.error}.`; if (event.error === 'no-speech') e = "Nenhuma fala detectada."; else if (event.error === 'not-allowed') e = "Permissão para microfone negada."; showError(e); });
 }
 
@@ -113,9 +140,9 @@ async function requestMicrophonePermission() {
 }
 
 function checkCompatibility() {
-    if (!window.isSecureContext) { showError("<strong>Conexão Insegura:</strong> HTTPS é necessário."); recordButton.disabled = true; return false; }
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { showError("<strong>Navegador Incompatível:</strong> API de microfone não suportada."); recordButton.disabled = true; return false; }
-    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) { showError("<strong>Navegador Incompatível:</strong> API de Reconhecimento de Fala não suportada."); recordButton.disabled = true; return false; }
+    if (!window.isSecureContext) { showError("<strong>Conexão Insegura:</strong> HTTPS é necessário."); if(recordButton) recordButton.disabled = true; return false; }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { showError("<strong>Navegador Incompatível:</strong> API de microfone não suportada."); if(recordButton) recordButton.disabled = true; return false; }
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) { showError("<strong>Navegador Incompatível:</strong> API de Reconhecimento de Fala não suportada."); if(recordButton) recordButton.disabled = true; return false; }
     return true;
 }
 
@@ -128,8 +155,9 @@ function loadNextSentence() {
         if (sentencesPool.length === 0) { sentenceToPracticeEl.textContent = "Você não tem erros para praticar. Bom trabalho!"; currentSentence = ''; recordButton.disabled = true; return; }
     } else if (currentPage === 'novas-palavras') {
         const level = userProfile.level || 'A1';
-        sentencesPool = newWordsSentences[level];
+        sentencesPool = newWordsSentences[level] || newWordsSentences['A1'];
     }
+    
     recordButton.disabled = false;
     const randomIndex = Math.floor(Math.random() * sentencesPool.length);
     currentSentence = sentencesPool[randomIndex];
@@ -145,22 +173,41 @@ function updateSentenceVisibility() {
 
 function toggleSentenceVisibility() { isSentenceVisible = !isSentenceVisible; updateSentenceVisibility(); }
 function listenToSentence() { if (!currentSentence) return; const utterance = new SpeechSynthesisUtterance(currentSentence); utterance.lang = 'en-US'; utterance.rate = 0.9; window.speechSynthesis.speak(utterance); }
-function handleRecordButtonClick() { if (!micPermissionGranted) { requestMicrophonePermission(); } else { if (!recognition) setupRecognition(); toggleRecording(); } }
-function toggleRecording() { if (!recognition || !currentSentence) return; if (isRecording) { recognition.stop(); } else { recognition.start(); } }
 
-function handleRecognitionResult(event) {
-    const userTranscript = event.results[0][0].transcript;
-    if (currentPage === 'treinamento' && !userProfile.level) {
-        handleAssessmentAnswer(userTranscript);
+function toggleRecording() {
+    if (!recognition) return;
+    if (isRecording) {
+        recognition.stop();
     } else {
-        statusEl.textContent = 'Avaliando sua resposta...';
-        getEvaluationFromGemini(userTranscript);
+        recognition.start();
     }
 }
 
-async function callGeminiAPI(prompt, isJson = false) {
+function handleRecordButtonClick() { 
+    if (!micPermissionGranted) { 
+        requestMicrophonePermission(); 
+    } else { 
+        if (!recognition) setupRecognition(); 
+        toggleRecording(); 
+    } 
+}
+
+function handleRecognitionResult(userTranscript) {
+    if (currentPage === 'treinamento' && !userProfile.level) {
+        handleAssessmentAnswer(userTranscript);
+    } else if (currentPage === 'livre') {
+        conversationHistory.push({ role: 'user', parts: [{ text: userTranscript }] });
+        statusEl.textContent = 'Avaliando e respondendo...';
+        getConversationalFeedback(userTranscript);
+    } else {
+        statusEl.textContent = 'Avaliando sua resposta...';
+        getSentenceBasedEvaluation(userTranscript);
+    }
+}
+
+async function callGeminiAPI(prompt, isJson = false, history = []) {
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
-    const payload = { contents: [{ parts: [{ text: prompt }] }] };
+    const payload = { contents: [...history, { role: 'user', parts: [{ text: prompt }] }] };
     if (isJson) {
         payload.generationConfig = { responseMimeType: "application/json" };
     }
@@ -180,10 +227,12 @@ async function callGeminiAPI(prompt, isJson = false) {
 async function generateSentenceFromTopic(topic) {
     statusEl.textContent = 'Gerando frase...';
     recordButton.disabled = true;
-    const prompt = `Generate a single, interesting English practice sentence about the topic: "${topic}". The sentence should be appropriate for an intermediate learner. Respond ONLY with the sentence in plain text.`;
+    conversationHistory = [];
+    const prompt = `You are a friendly English tutor. Start a short, simple conversation with a user whose English level is ${userProfile.level || 'B1'}. The user wants to talk about: "${topic}". Ask them one opening question about the topic. Respond ONLY with the question in plain text.`;
     const sentence = await callGeminiAPI(prompt);
     if (sentence) {
         currentSentence = sentence.trim().replace(/\"/g, "");
+        conversationHistory.push({ role: 'model', parts: [{ text: currentSentence }] });
         sentenceToPracticeEl.textContent = currentSentence;
         statusEl.textContent = 'Frase gerada! Clique para responder.';
         recordButton.disabled = false;
@@ -192,7 +241,7 @@ async function generateSentenceFromTopic(topic) {
     }
 }
 
-async function getEvaluationFromGemini(userTranscript) {
+async function getSentenceBasedEvaluation(userTranscript) {
     const prompt = `You are an English coach. Target sentence: "${currentSentence}". User said: "${userTranscript}". Your task is to: 1. Analyze the user's sentence. 2. Provide a score from 0 to 100. 3. Create a "correctedText" with <del> and <ins> tags. 4. Provide a concise, helpful "tip" in PORTUGUESE. Respond ONLY with a valid JSON object with keys "score", "correctedText", "tip".`;
     const resultText = await callGeminiAPI(prompt, true);
     if (resultText) {
@@ -205,13 +254,35 @@ async function getEvaluationFromGemini(userTranscript) {
     }
 }
 
-function displayFeedback(feedback) {
+async function getConversationalFeedback(userTranscript) {
+    const prompt = `The user's English level is ${userProfile.level || 'B1'}. Based on the ongoing conversation, evaluate the user's last response: "${userTranscript}". Then, continue the conversation naturally.
+    Your task is to provide two things in a JSON object:
+    1. "feedback": An object with a "score" (0-100 for grammar/relevance), a "correctedText" (the user's text with corrections using <del> and <ins>), and a "tip" in PORTUGUESE.
+    2. "nextSentence": Your next natural response in the conversation.
+    Respond ONLY with the valid JSON object.`;
+    const resultText = await callGeminiAPI(prompt, true, conversationHistory.slice(0, -1)); // Envia o histórico SEM a última resposta do usuário
+    if (resultText) {
+        try {
+            const result = JSON.parse(resultText);
+            displayFeedback(result.feedback, result.nextSentence);
+            updateProgress(result.feedback.score);
+            if (result.feedback.score < 85) { addError(userTranscript); }
+        } catch (e) { showError("Erro ao processar a resposta da IA."); }
+    }
+}
+
+function displayFeedback(feedback, nextSentence = null) {
     const { score, correctedText, tip } = feedback;
     let title, scoreClass;
     if (score >= 95) { title = "Excelente!"; scoreClass = 'bg-green-500/20 text-green-300'; } 
     else if (score >= 80) { title = "Muito Bom!"; scoreClass = 'bg-yellow-500/20 text-yellow-300'; } 
     else { title = "Continue Praticando!"; scoreClass = 'bg-orange-500/20 text-orange-300'; }
     
+    let nextButtonText = "Próxima Frase";
+    if (currentPage === 'livre') {
+        nextButtonText = "Continuar Conversa";
+    }
+
     const feedbackHTML = `
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-2xl font-bold">${title}</h2>
@@ -227,13 +298,21 @@ function displayFeedback(feedback) {
                 <p class="bg-gray-800 p-3 rounded-md text-gray-300">${tip}</p>
             </div>
         </div>
-        <button id="next-button" class="mt-6 w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">Próxima Frase</button>
+        <button id="next-button" class="mt-6 w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">${nextButtonText}</button>
     `;
     feedbackSection.innerHTML = feedbackHTML;
     feedbackSection.classList.remove('hidden');
     document.getElementById('next-button').addEventListener('click', () => {
-        if (currentPage === 'treinamento') startTrainingConversation();
-        else loadNextSentence();
+        if (currentPage === 'livre' && nextSentence) {
+            feedbackSection.classList.add('hidden');
+            currentSentence = nextSentence.trim().replace(/\"/g, "");
+            conversationHistory.push({ role: 'model', parts: [{ text: currentSentence }] });
+            sentenceToPracticeEl.textContent = currentSentence;
+            statusEl.textContent = "Responda à pergunta.";
+            listenToSentence();
+        } else {
+            loadNextSentence();
+        }
     });
 }
 
@@ -260,18 +339,23 @@ function askNextAssessmentQuestion() {
         if(micPermissionGranted) listenToSentence();
     } else { finishAssessment(); }
 }
-function handleAssessmentAnswer(transcript) { assessmentAnswers.push(transcript); assessmentStep++; askNextAssessmentQuestion(); }
+function handleAssessmentAnswer(transcript) {
+    if (isRecording) recognition.stop();
+    assessmentAnswers.push(transcript); 
+    assessmentStep++; 
+    askNextAssessmentQuestion(); 
+}
 
 async function finishAssessment() {
     statusEl.textContent = "Avaliando seu nível...";
-    const prompt = `Based on these answers to questions of increasing difficulty, what is the user's most likely CEFR English level (A1, A2, B1, B2)? The questions were: "${assessmentQuestions.join('; ')}". The user's answers were: "${assessmentAnswers.join('; ')}". Respond with ONLY the level code, e.g., "B1".`;
+    const prompt = `Based on these answers to questions of increasing difficulty: "${assessmentAnswers.join('; ')}", what is the user's most likely CEFR English level (A1, A2, B1, B2)? Respond with ONLY the level code, e.g., "B1".`;
     const level = await callGeminiAPI(prompt);
     if (level && ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].includes(level.trim())) {
         userProfile.level = level.trim();
         userProfile.xp = 0;
         saveData(PROFILE_KEY, userProfile);
-        alert(`Seu nível foi avaliado como ${userProfile.level}! Iniciando o treinamento.`);
-        startTrainingConversation();
+        alert(`Seu nível foi avaliado como ${userProfile.level}! Você será redirecionado para a Conversa Livre para começar a praticar.`);
+        window.location.href = 'conversa-livre.html';
     } else {
         showError("Não foi possível avaliar seu nível. Tente novamente.");
         assessmentView.classList.remove('hidden');
@@ -279,32 +363,25 @@ async function finishAssessment() {
     }
 }
 
-async function startTrainingConversation() {
-    statusEl.textContent = "Gerando uma conversa...";
-    feedbackSection.classList.add('hidden');
-    const prompt = `You are a friendly English tutor. Start a short, simple conversation with a user whose English level is ${userProfile.level}. Ask them one opening question. The topic can be about daily life, hobbies, or work. Respond ONLY with the question in plain text.`;
-    const sentence = await callGeminiAPI(prompt);
-    if (sentence) {
-        currentSentence = sentence.trim().replace(/\"/g, "");
-        sentenceToPracticeEl.textContent = currentSentence;
-        statusEl.textContent = "Responda à pergunta.";
-        recordButton.disabled = false;
-        listenToSentence();
-    } else {
-        statusEl.textContent = "Erro ao iniciar a conversa.";
-    }
+function setGreeting() {
+    if (!greetingEl) return;
+    const hour = new Date().getHours();
+    if (hour < 12) { greetingEl.textContent = "Bom dia!"; } 
+    else if (hour < 18) { greetingEl.textContent = "Boa tarde!"; } 
+    else { greetingEl.textContent = "Boa noite!"; }
 }
-
 
 // --- Event Listeners ---
 function setupEventListeners() {
-    if (menuButton) menuButton.addEventListener('click', () => document.body.classList.toggle('menu-open'));
+    if (menuButton) menuButton.addEventListener('click', () => document.body.classList.add('menu-open'));
+    if (closeMenuButton) closeMenuButton.addEventListener('click', () => document.body.classList.remove('menu-open'));
+    if (menuOverlay) menuOverlay.addEventListener('click', () => document.body.classList.remove('menu-open'));
     if (listenButton) listenButton.addEventListener('click', listenToSentence);
     if (recordButton) recordButton.addEventListener('click', handleRecordButtonClick);
     if (toggleVisibilityButton) toggleVisibilityButton.addEventListener('click', toggleSentenceVisibility);
     if (startAssessmentButton) startAssessmentButton.addEventListener('click', startLevelAssessment);
     if (topicForm) {
-        topicForm.addEventListener('submit', (e) => { e.preventDefault(); const topic = topicInput.value.trim(); if (topic) { generateSentenceFromTopic(topic); topicInput.value = ''; } });
+        topicForm.addEventListener('submit', (e) => { e.preventDefault(); const topic = topicInput.value.trim(); if (topic) { generateSentenceFromTopic(topic); } });
     }
 }
 
@@ -316,10 +393,9 @@ window.addEventListener('load', () => {
     updateDisplays();
 
     if (currentPage === 'treinamento') {
+        setGreeting();
         if (userProfile.level) {
-            assessmentView.classList.add('hidden');
-            practiceView.classList.remove('hidden');
-            startTrainingConversation();
+            window.location.href = 'conversa-livre.html';
         } else {
             assessmentView.classList.remove('hidden');
             practiceView.classList.add('hidden');
@@ -327,8 +403,14 @@ window.addEventListener('load', () => {
     } else if (currentPage === 'erros' || currentPage === 'novas-palavras') {
         loadNextSentence();
     } else if (currentPage === 'livre') {
-        recordButton.disabled = true;
-        sentenceToPracticeEl.textContent = "Digite um tópico acima e clique em 'Gerar Frase'.";
+        if(recordButton) recordButton.disabled = true;
+        if(sentenceToPracticeEl) sentenceToPracticeEl.textContent = "Digite um tópico acima para iniciar uma conversa.";
+        // Inicia uma conversa aleatória se o usuário simplesmente clicar no microfone
+        recordButton.addEventListener('click', () => {
+            if (!currentSentence) {
+                generateSentenceFromTopic("a random topic");
+            }
+        });
     }
     
     if (checkCompatibility()) {
