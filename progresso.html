@@ -14,17 +14,23 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
     </button>
     <nav id="side-menu">
+        <a href="treinamento.html">Treinamento</a>
         <a href="conversa-livre.html">Conversa Livre</a>
+        <a href="novas-palavras.html">Novas Palavras</a>
         <a href="praticar-erros.html">Praticar Erros</a>
         <a href="progresso.html" class="active">Meu Progresso</a>
     </nav>
 
-    <div class="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-2xl border border-gray-700">
+    <div class="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-3xl border border-gray-700">
         <header class="text-center mb-6">
             <h1 class="text-2xl sm:text-3xl font-bold text-cyan-400">Meu Progresso</h1>
         </header>
 
-        <main id="progress-summary" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <main id="progress-summary" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="progress-stat">
+                <div class="label">Nível (CEFR)</div>
+                <div id="user-level" class="value">--</div>
+            </div>
             <div class="progress-stat">
                 <div class="label">Frases Praticadas</div>
                 <div id="phrases-practiced" class="value">0</div>

@@ -3,40 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conversa Livre - Prática de Idiomas</title>
+    <title>Novas Palavras - Prática de Idiomas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/style.css">
 </head>
-<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4" data-page="livre">
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4" data-page="novas-palavras">
 
-    <!-- Botão do Menu Hambúrguer -->
-    <button id="menu-button" class="p-2 rounded-md hover:bg-gray-700">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
-    </button>
-
-    <!-- Menu Lateral -->
+    <button id="menu-button" class="p-2 rounded-md hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg></button>
     <nav id="side-menu">
-        <a href="conversa-livre.html" class="active">Conversa Livre</a>
+        <a href="treinamento.html">Treinamento</a>
+        <a href="conversa-livre.html">Conversa Livre</a>
+        <a href="novas-palavras.html" class="active">Novas Palavras</a>
         <a href="praticar-erros.html">Praticar Erros</a>
         <a href="progresso.html">Meu Progresso</a>
-        <a href="treinamento.html">Meu Progresso</a>
-        <a href="novas-palavras.html">Meu Progresso</a>
     </nav>
 
     <div class="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-2xl border border-gray-700">
         <header class="text-center mb-6">
-            <h1 class="text-2xl sm:text-3xl font-bold text-cyan-400">Conversa Livre</h1>
+            <h1 class="text-2xl sm:text-3xl font-bold text-cyan-400">Novas Palavras</h1>
         </header>
-        
         <main id="practice-area">
+            <!-- A estrutura de prática é a mesma, o JS carregará as frases corretas -->
             <div id="error-message" class="hidden mb-4 bg-red-500/20 border border-red-500/30 text-red-300 text-sm p-3 rounded-lg"></div>
-            
-            <form id="topic-form" class="flex gap-2 mb-4">
-                <input type="text" id="topic-input" class="flex-grow bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Digite um tópico. Ex: viagem, tecnologia...">
-                <button type="submit" class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-md transition-colors">Gerar Frase</button>
-            </form>
-
             <div class="bg-gray-700/50 p-4 rounded-lg mb-6 flex items-center justify-between min-h-[80px]">
                 <p id="sentence-to-practice" class="text-lg text-gray-200 flex-grow"></p>
                 <div class="flex items-center ml-4">
@@ -44,15 +33,11 @@
                     <button id="listen-button" class="p-2 rounded-full hover:bg-gray-600 transition-colors"></button>
                 </div>
             </div>
-
             <div class="flex flex-col items-center justify-center my-8">
                 <button id="record-button" class="bg-cyan-600 hover:bg-cyan-700 w-20 h-20 rounded-full flex items-center justify-center shadow-lg disabled:bg-gray-500 disabled:cursor-not-allowed"></button>
                 <p id="status" class="text-gray-400 mt-4 h-5 text-center"></p>
             </div>
-
-            <div id="feedback-section" class="hidden">
-                 <!-- Conteúdo do feedback será inserido aqui pelo JS -->
-            </div>
+            <div id="feedback-section" class="hidden"></div>
         </main>
     </div>
 
