@@ -1,0 +1,99 @@
+/* Estilo base do corpo e fontes */
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Animação de pulso para o botão de gravação */
+.pulse {
+    animation: pulse-animation 1.5s infinite;
+}
+@keyframes pulse-animation {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+/* Estilo para correções no feedback */
+.feedback-card del {
+    text-decoration-color: #f87171;
+    text-decoration-thickness: 2px;
+}
+.feedback-card ins {
+    background-color: #166534;
+    color: #bbf7d0;
+    text-decoration: none;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+/* Estilo para esconder o texto da frase (modo escuta) */
+#sentence-to-practice.hidden-text {
+    color: transparent;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+}
+
+/* --- Novos Estilos para Menu Lateral e Navegação --- */
+
+/* Botão do Menu (Hambúrguer) */
+#menu-button {
+    position: fixed;
+    top: 1.5rem;
+    left: 1.5rem;
+    z-index: 100;
+}
+
+/* Menu Lateral */
+#side-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100%;
+    background-color: #1f2937; /* bg-gray-800 */
+    padding: 6rem 1.5rem 1.5rem;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 90;
+    border-right: 1px solid #374151; /* border-gray-700 */
+}
+
+/* Estado aberto do menu */
+body.menu-open #side-menu {
+    transform: translateX(0);
+}
+
+/* Links de navegação no menu */
+#side-menu a {
+    display: block;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 1.125rem; /* text-lg */
+    color: #d1d5db; /* text-gray-300 */
+    transition: background-color 0.2s;
+}
+#side-menu a:hover {
+    background-color: #374151; /* bg-gray-700 */
+}
+#side-menu a.active {
+    background-color: #0891b2; /* bg-cyan-600 */
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* Estilos para a página de progresso */
+.progress-stat {
+    background-color: #374151; /* bg-gray-700 */
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    text-align: center;
+}
+.progress-stat .label {
+    font-size: 1rem;
+    color: #9ca3af; /* text-gray-400 */
+}
+.progress-stat .value {
+    font-size: 2.25rem; /* text-4xl */
+    font-weight: 700;
+    color: #22d3ee; /* text-cyan-400 */
+}
